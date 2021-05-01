@@ -21,6 +21,7 @@ const tours = JSON.parse(
 );
 
 //? ROUTE HANDLER
+//* index
 app.get('/api/v1/tours', (req, res) => {
     res.status(200).json({
         status: 'success',
@@ -29,7 +30,9 @@ app.get('/api/v1/tours', (req, res) => {
     });
 });
 
+//* create
 app.post('/api/v1/tours', (req, res) => {
+    //?this is how to check the body from the request
     //   console.log(req.body);
     const newId = tours[tours.length - 1].id + 1;
     //? CREATE A NEW OBJECT, INJECTING IDs
@@ -54,6 +57,29 @@ app.post('/api/v1/tours', (req, res) => {
     );
 });
 
+//* show
+app.get('/api/v1/tours/:id', (req, res) => {
+    //? this is how to check the params from the request
+    // console.log(req.params);
+
+    //? JSON value is always a string, remember to convert them into int
+    // const id = parseInt(req.params.id);
+    //* cool stuff to do str to int conversion
+    const id = req.params.id * 1;
+    const tour = tours.find((tour) => tour.id === id);
+    if (!tour) {
+        return res.status(404).json({
+            status: 'not found',
+            message: 'tour not found',
+        });
+    }
+    res.status(200).json({
+        status: 'success',
+        data: {
+            tour: tour,
+        },
+    });
+});
 const port = 3000;
 app.listen(port, () => {
     console.log(`App running on port ${port}...`);
