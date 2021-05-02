@@ -5,6 +5,17 @@ const app = express();
 
 //! USING MIDDLEWARE for POST REQUEST
 app.use(express.json());
+//! CUSTOM MIDDLEWARE, the third argument in the callback is always the next
+//! and always call next() at the end of the middleware, otherwise the app will be stuck
+app.use((req, res, next) => {
+    console.log('Hello from the custom middleware');
+    next();
+});
+
+app.use((req, res, next) => {
+    req.requestTime = new Date().toISOString();
+    next();
+});
 
 const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
@@ -12,8 +23,10 @@ const tours = JSON.parse(
 
 //! REFRACTOR ! dry dry dry
 const getAllTours = (req, res) => {
+    console.log(req.requestTime);
     res.status(200).json({
         status: 'success',
+        requestAt: req.requestTime,
         result: tours.length,
         data: { tours },
     });
