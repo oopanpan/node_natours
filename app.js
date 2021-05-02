@@ -14,7 +14,7 @@ app.use(express.json());
 //! CUSTOM MIDDLEWARE, the third argument in the callback is always the next
 //! and always call next() at the end of the middleware, otherwise the app will be stuck
 app.use((req, res, next) => {
-    console.log('Hello from the custom middleware');
+    console.log('---Message from CUSTOM MIDDLEWARE---');
     next();
 });
 

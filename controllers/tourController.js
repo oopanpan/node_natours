@@ -4,6 +4,28 @@ const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/../dev-data/data/tours-simple.json`)
 );
 
+//* custom middleware to validate id
+exports.checkID = (req, res, next, val) => {
+    if (req.params.id * 1 > tours.length) {
+        return res.status(404).json({
+            status: 'fail',
+            message: 'Invalid ID',
+        });
+    }
+    next();
+};
+
+//* custom middleware to validate body content
+exports.checkBody = (req, res, next) => {
+    if (!req.body.name || !req.body.price) {
+        return res.status(400).json({
+            status: 'fail',
+            message: 'Tour name and price cannot be blank',
+        });
+    }
+    next();
+};
+
 exports.getAllTours = (req, res) => {
     console.log(req.requestTime);
     res.status(200).json({
@@ -16,7 +38,7 @@ exports.getAllTours = (req, res) => {
 
 exports.createTour = (req, res) => {
     //?this is how to check the body from the request
-    //   console.log(req.body);
+    // console.log(req.body);
     const newId = tours[tours.length - 1].id + 1;
     //? CREATE A NEW OBJECT, INJECTING IDs
     //* ES5
@@ -26,7 +48,7 @@ exports.createTour = (req, res) => {
     tours.push(newTour);
     //? use Async
     fs.writeFile(
-        `${__dirname}/dev-data/data/tours-simple.json`,
+        `${__dirname}/../dev-data/data/tours-simple.json`,
         JSON.stringify(tours),
         (err) => {
             //* 200 means OK, 201 means CREATED!!!
@@ -41,20 +63,9 @@ exports.createTour = (req, res) => {
 };
 
 exports.getTour = (req, res) => {
-    //? this is how to check the params from the request
-    // console.log(req.params);
-
-    //? JSON value is always a string, remember to convert them into int
-    // const id = parseInt(req.params.id);
     //* cool stuff to do str to int conversion
     const id = req.params.id * 1;
     const tour = tours.find((tour) => tour.id === id);
-    if (!tour) {
-        return res.status(404).json({
-            status: 'not found',
-            message: 'tour not found',
-        });
-    }
     res.status(200).json({
         status: 'success',
         data: {
@@ -66,13 +77,6 @@ exports.getTour = (req, res) => {
 exports.updateTour = (req, res) => {
     const id = req.params.id * 1;
     const tour = tours.find((tour) => tour.id === id);
-    if (!tour) {
-        return res.status(404).json({
-            status: 'fail',
-            message: 'invalid id',
-        });
-    }
-    //? fancy stuff to replace the data with data from params
     res.status(200).json({
         status: 'success',
         data: {
