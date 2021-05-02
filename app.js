@@ -100,6 +100,16 @@ app.patch('/api/v1/tours/:id', (req, res) => {
     });
 });
 
+//* delete
+app.delete('api/v1/tours/:id', (req, res) => {
+    //? mongoDB where are you
+    //? status 204, NO CONTENT SUCCESS
+    res.status(204).json({
+        status: 'success',
+        data: null,
+    });
+});
+
 const port = 3000;
 app.listen(port, () => {
     console.log(`App running on port ${port}...`);
