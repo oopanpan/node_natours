@@ -6,32 +6,20 @@ const app = express();
 //! USING MIDDLEWARE for POST REQUEST
 app.use(express.json());
 
-// app.get('/', (req, res) => {
-//   res
-//     .status(200)
-//     .json({ message: 'Hello there this is our server', app: 'Natours' });
-// });
-
-// app.post('/', (req, res) => {
-//   res.send('You may post to this endpoint...');
-// });
-
 const tours = JSON.parse(
     fs.readFileSync(`${__dirname}/dev-data/data/tours-simple.json`)
 );
 
-//? ROUTE HANDLER
-//* index
-app.get('/api/v1/tours', (req, res) => {
+//! REFRACTOR ! dry dry dry
+const getAllTours = (req, res) => {
     res.status(200).json({
         status: 'success',
         result: tours.length,
         data: { tours },
     });
-});
+};
 
-//* create
-app.post('/api/v1/tours', (req, res) => {
+const createTour = (req, res) => {
     //?this is how to check the body from the request
     //   console.log(req.body);
     const newId = tours[tours.length - 1].id + 1;
@@ -55,10 +43,9 @@ app.post('/api/v1/tours', (req, res) => {
             });
         }
     );
-});
+};
 
-//* show
-app.get('/api/v1/tours/:id', (req, res) => {
+const getTour = (req, res) => {
     //? this is how to check the params from the request
     // console.log(req.params);
 
@@ -79,10 +66,9 @@ app.get('/api/v1/tours/:id', (req, res) => {
             tour: tour,
         },
     });
-});
+};
 
-//* update
-app.patch('/api/v1/tours/:id', (req, res) => {
+const updateTour = (req, res) => {
     const id = req.params.id * 1;
     const tour = tours.find((tour) => tour.id === id);
     if (!tour) {
@@ -98,17 +84,33 @@ app.patch('/api/v1/tours/:id', (req, res) => {
             tour: tour,
         },
     });
-});
+};
 
-//* delete
-app.delete('api/v1/tours/:id', (req, res) => {
+const deleteTour = (req, res) => {
     //? mongoDB where are you
     //? status 204, NO CONTENT SUCCESS
     res.status(204).json({
         status: 'success',
         data: null,
     });
-});
+};
+//? ROUTE HANDLER
+// //* index
+// app.get('/api/v1/tours', getAllTours);
+// //* create
+// app.post('/api/v1/tours', createTour);
+// //* show
+// app.get('/api/v1/tours/:id', getTour);
+// //* update
+// app.patch('/api/v1/tours/:id', updateTour);
+// //* delete
+// app.delete('api/v1/tours/:id', deleteTour);
+//* CHAINING requests using .route()
+app.route('/api/v1/tours').get(getAllTours).post(createTour);
+app.route('/api/v1/tours/:id')
+    .get(getTour)
+    .patch(updateTour)
+    .delete(deleteTour);
 
 const port = 3000;
 app.listen(port, () => {
