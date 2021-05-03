@@ -65,7 +65,7 @@ exports.createTour = (req, res) => {
 exports.getTour = (req, res) => {
     //* cool stuff to do str to int conversion
     const id = req.params.id * 1;
-    const tour = tours.find((tour) => tour.id === id);
+    const tour = tours.find((el) => el.id === id);
     res.status(200).json({
         status: 'success',
         data: {
@@ -76,7 +76,7 @@ exports.getTour = (req, res) => {
 
 exports.updateTour = (req, res) => {
     const id = req.params.id * 1;
-    const tour = tours.find((tour) => tour.id === id);
+    const tour = tours.find((el) => el.id === id);
     res.status(200).json({
         status: 'success',
         data: {

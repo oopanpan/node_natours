@@ -7,8 +7,10 @@ const userRouter = require('./routes/userRoutes');
 
 const app = express();
 
-// 1) Middlewares
-app.use(morgan('dev'));
+// 1) Middleware
+if (process.env.NODE_ENV === 'development') {
+    app.use(morgan('dev'));
+}
 //! USING MIDDLEWARE for POST REQUEST
 app.use(express.json());
 //! CUSTOM MIDDLEWARE, the third argument in the callback is always the next
