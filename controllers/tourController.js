@@ -19,7 +19,12 @@ exports.createTour = async (req, res) => {
 
 exports.getAllTours = async (req, res) => {
     try {
-        const allTours = await Tour.find();
+        //? Querying with copy of the query and eliminate sorting query
+        const queryObj = { ...req.query };
+        const excludedFields = ['age', 'sort', 'limit', 'fields'];
+        excludedFields.forEach((el) => delete queryObj[el]);
+        console.log(req.query, queryObj);
+        const allTours = await Tour.find(queryObj);
         res.status(200).json({
             status: 'success',
             result: allTours.length,
