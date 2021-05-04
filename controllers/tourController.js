@@ -20,12 +20,12 @@ exports.createTour = async (req, res) => {
 exports.getAllTours = async (req, res) => {
     try {
         //* BUILD QUERY
-        //* 1) basic filtering
+        //* 1A) basic filtering
         const queryObj = { ...req.query };
         const excludedFields = ['age', 'sort', 'limit', 'fields'];
         excludedFields.forEach((el) => delete queryObj[el]);
 
-        //* 2) advanced filtering
+        //* 1B) advanced filtering
         //? replacing query [gte] [gt] [lte] [lt] into mongo command
         let queryStr = JSON.stringify(queryObj);
         queryStr = queryStr.replace(
@@ -33,7 +33,12 @@ exports.getAllTours = async (req, res) => {
             (match) => `$${match}`
         );
 
-        const query = Tour.find(JSON.parse(queryStr));
+        let query = Tour.find(JSON.parse(queryStr));
+
+        //* 2) sorting
+        if (req.query.sort) {
+            query = query.sort(req.query.sort);
+        }
         //* EXECUTE QUERY
         const allTours = await query;
 
