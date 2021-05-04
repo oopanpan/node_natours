@@ -20,12 +20,20 @@ exports.createTour = async (req, res) => {
 exports.getAllTours = async (req, res) => {
     try {
         //* BUILD QUERY
+        //* 1) basic filtering
         const queryObj = { ...req.query };
         const excludedFields = ['age', 'sort', 'limit', 'fields'];
         excludedFields.forEach((el) => delete queryObj[el]);
-        console.log(req.query, queryObj);
-        const query = Tour.find(queryObj);
 
+        //* 2) advanced filtering
+        //? replacing query [gte] [gt] [lte] [lt] into mongo command
+        let queryStr = JSON.stringify(queryObj);
+        queryStr = queryStr.replace(
+            /\b(gte|gt|lte|lt)\b/g,
+            (match) => `$${match}`
+        );
+
+        const query = Tour.find(JSON.parse(queryStr));
         //* EXECUTE QUERY
         const allTours = await query;
 
