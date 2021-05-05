@@ -37,9 +37,10 @@ exports.getAllTours = async (req, res) => {
 
         //* 2) sorting
         if (req.query.sort) {
-            query = query.sort(req.query.sort);
+            const sortBy = req.query.sort.split(',').join(' ');
+            query = query.sort(sortBy);
         } else {
-            query = query.sort('-createdAt');
+            query = query.sort('-ratingsAverage');
         }
 
         //* 3) field limiting
@@ -51,6 +52,11 @@ exports.getAllTours = async (req, res) => {
         }
 
         //* 4) pagination
+        const page = req.query.page * 1 || 1;
+        const limit = req.query.limit * 1 || 10;
+        const skip = (page - 1) * limit;
+        console.log(page, limit, skip);
+        query = query.skip(0).limit(3);
 
         //* EXECUTE QUERY
         const allTours = await query;
