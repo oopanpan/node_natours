@@ -22,7 +22,7 @@ exports.getAllTours = async (req, res) => {
         //* BUILD QUERY
         //* 1A) basic filtering
         const queryObj = { ...req.query };
-        const excludedFields = ['age', 'sort', 'limit', 'fields'];
+        const excludedFields = ['page', 'sort', 'limit', 'fields'];
         excludedFields.forEach((el) => delete queryObj[el]);
 
         //* 1B) advanced filtering
@@ -55,8 +55,7 @@ exports.getAllTours = async (req, res) => {
         const page = req.query.page * 1 || 1;
         const limit = req.query.limit * 1 || 10;
         const skip = (page - 1) * limit;
-        console.log(page, limit, skip);
-        query = query.skip(0).limit(3);
+        query = query.skip(skip).limit(limit);
 
         //* EXECUTE QUERY
         const allTours = await query;
