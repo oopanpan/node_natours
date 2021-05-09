@@ -8,6 +8,62 @@ exports.aliasTopTours = (req, res, next) => {
     next();
 };
 
+class APIFeatures {
+    constructor(query, queryStr) {
+        this.query = query;
+        this.queryStr = queryStr;
+    }
+
+    filter() {
+        const queryObj = { ...this.queryStr };
+        const excludedFields = ['page', 'sort', 'limit', 'fields'];
+        excludedFields.forEach((el) => delete queryObj[el]);
+
+        //* 1B) advanced filtering
+        //? replacing query [gte] [gt] [lte] [lt] into mongo command
+        let queryStr = JSON.stringify(queryObj);
+        queryStr = queryStr.replace(
+            /\b(gte|gt|lte|lt)\b/g,
+            (match) => `$${match}`
+        );
+
+        this.query = this.query.find(JSON.parse(queryStr));
+
+        return this;
+    }
+
+    sort() {
+        if (this.queryStr.sort) {
+            const sortBy = this.queryStr.sort.split(',').join(' ');
+            this.query = this.query.sort(sortBy);
+        } else {
+            this.query = this.query.sort('-price');
+        }
+
+        return this;
+    }
+
+    limitFields() {
+        if (this.queryStr.fields) {
+            const fields = this.queryStr.fields.split(',').join(' ');
+            this.query = this.query.select(fields);
+        } else {
+            this.query = this.query.select('-__v');
+        }
+
+        return this;
+    }
+
+    paginate() {
+        const page = +this.queryStr.page || 1;
+        const limit = +this.queryStr.limit || 10;
+        const skip = (page - 1) * limit;
+        this.query = this.query.skip(skip).limit(limit);
+
+        return this;
+    }
+}
+
 exports.createTour = async (req, res) => {
     try {
         const newTour = await Tour.create(req.body);
@@ -27,51 +83,15 @@ exports.createTour = async (req, res) => {
 
 exports.getAllTours = async (req, res) => {
     try {
-        //* BUILD QUERY
-        //* 1A) basic filtering
-        const queryObj = { ...req.query };
-        const excludedFields = ['page', 'sort', 'limit', 'fields'];
-        excludedFields.forEach((el) => delete queryObj[el]);
-
-        //* 1B) advanced filtering
-        //? replacing query [gte] [gt] [lte] [lt] into mongo command
-        let queryStr = JSON.stringify(queryObj);
-        queryStr = queryStr.replace(
-            /\b(gte|gt|lte|lt)\b/g,
-            (match) => `$${match}`
-        );
-
-        let query = Tour.find(JSON.parse(queryStr));
-
-        //* 2) sorting
-        if (req.query.sort) {
-            const sortBy = req.query.sort.split(',').join(' ');
-            query = query.sort(sortBy);
-        } else {
-            query = query.sort('-price');
-        }
-
-        //* 3) field limiting
-        if (req.query.fields) {
-            const fields = req.query.fields.split(',').join(' ');
-            query = query.select(fields);
-        } else {
-            query = query.select('-__v');
-        }
-
-        //* 4) pagination
-        const page = +req.query.page || 1;
-        const limit = +req.query.limit || 10;
-        const skip = (page - 1) * limit;
-        query = query.skip(skip).limit(limit);
-
-        if (req.query.page) {
-            const numTours = await Tour.countDocuments();
-            if (skip >= numTours) throw new Error('This page does not exist');
-        }
+        //* ALL PREV CODES HAS BEEN REFRACTORED
 
         //* EXECUTE QUERY
-        const allTours = await query;
+        const features = new APIFeatures(Tour.find(), req.query)
+            .filter()
+            .sort()
+            .limitFields()
+            .paginate();
+        const allTours = await features.query;
 
         //* SEND RESPONSE
         res.status(200).json({
