@@ -108,7 +108,7 @@ exports.getTourStats = async (req, res) => {
     try {
         const stats = await Tour.aggregate([
             {
-                $match: { ratingAverage: { $gte: 4 } },
+                $match: { ratingsAverage: { $gte: 4 } },
             },
             {
                 $group: {
