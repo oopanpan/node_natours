@@ -1,5 +1,6 @@
 const Tour = require('../models/tourModel');
 const APIFeatures = require('../utils/apiFeatures');
+const AppError = require('../utils/appError');
 const catchAsync = require('../utils/catchAsync');
 
 //? middleware to prefill the query
@@ -39,7 +40,15 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 });
 
 exports.getTour = catchAsync(async (req, res, next) => {
-    const tour = await Tour.findById(req.params.id);
+    const tour = await Tour.findById(req.params.id, (err) => {
+        if (err) {
+            return next(new AppError('No tour found with that ID', 404));
+        }
+    });
+    console.log(tour);
+    if (!tour) {
+        return next(new AppError('No tour found wi that ID', 404));
+    }
     res.status(200).json({
         status: 'success',
         data: {
