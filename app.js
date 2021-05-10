@@ -11,14 +11,9 @@ const app = express();
 if (process.env.NODE_ENV === 'development') {
     app.use(morgan('dev'));
 }
-//! USING MIDDLEWARE for POST REQUEST
+
 app.use(express.json());
-//! CUSTOM MIDDLEWARE, the third argument in the callback is always the next
-//! and always call next() at the end of the middleware, otherwise the app will be stuck
-app.use((req, res, next) => {
-    console.log('---Message from CUSTOM MIDDLEWARE---');
-    next();
-});
+app.use(express.static(`${__dirname}/public`));
 
 app.use((req, res, next) => {
     req.requestTime = new Date().toISOString();
@@ -29,5 +24,16 @@ app.use((req, res, next) => {
 
 app.use('/api/v1/tours', tourRouter);
 app.use('/api/v1/users', userRouter);
+
+//* No Route Handling
+app.all('*', (req, res, next) => {
+    res.status(404).json({
+        status: 'fail',
+        message: `Can't find ${req.originalUrl} on this server!`,
+    });
+    next();
+});
+
 // 4) Start Server
+
 module.exports = app;
