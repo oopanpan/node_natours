@@ -64,7 +64,7 @@ exports.updateTour = catchAsync(async (req, res, next) => {
         },
         (err) => {
             if (err) {
-                return next(new AppError('No tour found with that ID', 404));
+                return next(new AppError(err));
             }
         }
     );
@@ -77,7 +77,7 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 exports.deleteTour = catchAsync(async (req, res, next) => {
     await Tour.findByIdAndDelete(req.params.id, (err) => {
         if (err) {
-            return next(new AppError('No tour found with that ID', 404));
+            return next(new AppError(err));
         }
     });
     res.status(204).json({
