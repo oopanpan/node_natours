@@ -1,4 +1,5 @@
 const mongoose = require('mongoose');
+const validator = require('validator');
 
 // name, email, photo, password, passwordConfirm
 
@@ -15,10 +16,22 @@ const userSchema = new mongoose.Schema({
         type: String,
         required: [true, 'email is required'],
         unique: [true, 'this email has already been registered'],
+        lowercase: true,
         trim: true,
+        validate: [validator.isEmail, 'invalid email format'],
     },
-    password: String,
-    passwordConfirm: String,
+    photo: String,
+    password: {
+        type: String,
+        required: [true, 'password cannot be blank'],
+        minlength: [8, 'password needs to be 8 or more characters'],
+    },
+    passwordConfirm: {
+        type: String,
+        required: [true, 'Please confirm your password'],
+    },
 });
 
-module.exports = userSchema;
+const User = mongoose.model('User', userSchema);
+
+module.exports = User;
