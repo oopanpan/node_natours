@@ -29,6 +29,12 @@ const userSchema = new mongoose.Schema({
     passwordConfirm: {
         type: String,
         required: [true, 'Please confirm your password'],
+        //! CUSTOM VALIDATOR ONLY WORK ON .save()
+        validate: {
+            validator: function (el) {
+                return el === this.password;
+            },
+        },
     },
 });
 
