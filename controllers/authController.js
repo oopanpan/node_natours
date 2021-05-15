@@ -24,10 +24,22 @@ exports.signup = catchAsync(async (req, res, next) => {
     });
 });
 
-exports.login = (req, res, next) => {
+exports.login = catchAsync(async (req, res, next) => {
     const { email, password } = req.body;
 
+    //? Require email and password
     if (!email || !password) {
         return next(new AppError('Email or password cannot be blank', 400));
     }
-};
+
+    //? Check user entity and password correctness
+    const user = await User.findOne({ email }).select('+password');
+
+    //?
+    res.status(200).json({
+        status: 'success',
+        data: {
+            user,
+        },
+    });
+});
