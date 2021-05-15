@@ -3,6 +3,12 @@ const User = require('../models/userModel');
 const catchAsync = require('../utils/catchAsync');
 const AppError = require('../utils/appError');
 
+const signToken = (id) => {
+    return jwt.sign({ id }, process.env.JWT_SECRET, {
+        expiresIn: process.env.JWT_EXPIRES_IN,
+    });
+};
+
 exports.signup = catchAsync(async (req, res, next) => {
     const { name, email, password, passwordConfirm } = req.body;
     const newUser = await User.create({
@@ -12,9 +18,7 @@ exports.signup = catchAsync(async (req, res, next) => {
         passwordConfirm,
     });
 
-    const token = jwt.sign({ id: newUser._id }, process.env.JWT_SECRET, {
-        expiresIn: process.env.JWT_EXPIRES_IN,
-    });
+    const token = signToken(newUser._id);
     res.status(201).json({
         status: 'success',
         token,
@@ -35,11 +39,14 @@ exports.login = catchAsync(async (req, res, next) => {
     //? Check user entity and password correctness
     const user = await User.findOne({ email }).select('+password');
 
-    //?
+    if (!user || !(await user.correctPassword(password, user.password))) {
+        return next(new AppError('Incorrect Email or password', 401));
+    }
+
+    const token = signToken(user._id);
+    //? sned json back
     res.status(200).json({
         status: 'success',
-        data: {
-            user,
-        },
+        token,
     });
 });
