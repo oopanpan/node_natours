@@ -1,5 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
+const bcrypt = require('bcryptjs');
 
 // name, email, photo, password, passwordConfirm
 
@@ -34,8 +35,21 @@ const userSchema = new mongoose.Schema({
             validator: function (el) {
                 return el === this.password;
             },
+            message: 'Both passwords should be matching',
         },
     },
+});
+
+//* ENCRYPTION
+userSchema.pre('save', async function (next) {
+    //? Only run this function if password was actually modified
+    if (!this.isModified('password')) return next();
+
+    //* CPU intensiveness for using, String will give salt
+    this.password = await bcrypt.hash(this.password, 12);
+
+    //? Delete the passwordConfirmed
+    this.passwordConfirm = undefined;
 });
 
 const User = mongoose.model('User', userSchema);
