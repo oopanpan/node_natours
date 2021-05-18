@@ -50,3 +50,16 @@ exports.login = catchAsync(async (req, res, next) => {
         token,
     });
 });
+
+exports.protect = catchAsync(async (req, res, next) => {
+    let token;
+    const auth = req.headers.authorization;
+    if (auth && auth.startsWith('Bearer')) {
+        token = auth.split(' ')[1];
+    }
+    console.log(token);
+    if (!token) {
+        return next(new AppError('Please Login or Signup', 401));
+    }
+    next();
+});
