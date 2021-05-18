@@ -31,6 +31,9 @@ const handleCastErrorDB = (err) => {
     return new AppError(message, 400);
 };
 
+const handleJWTErrorDB = () =>
+    new AppError('Invalid Authentication Token Detected', 401);
+
 module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
     err.status = err.status || 'error';
@@ -40,6 +43,7 @@ module.exports = (err, req, res, next) => {
     } else if (process.env.NODE_ENV === 'production') {
         let error = { ...err };
         if (error.name === 'CastError') error = handleCastErrorDB(error);
+        if (error.name === 'JsonWebTokenError') handleJWTErrorDB();
         sendErrorProd(error, res);
     }
 };

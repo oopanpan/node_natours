@@ -63,7 +63,7 @@ exports.protect = catchAsync(async (req, res, next) => {
         return next(new AppError('Please Login or Signup', 401));
     }
 
-    //* Verification token
+    //* Verification token using built in util.promisify
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
     console.log(decoded);
     next();
