@@ -26,3 +26,9 @@ const port = process.env.PORT || 3000;
 app.listen(port, () => {
     console.log(`App running on port ${port}...`);
 });
+
+process.on('unhandledRejection', (err) => {
+    console.log(err.name, err.message);
+    console.log('UNHANDLED REJECTION, shutting down...');
+    process.getMaxListeners(1);
+});
