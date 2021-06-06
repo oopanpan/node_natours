@@ -41,11 +41,7 @@ exports.getAllTours = catchAsync(async (req, res, next) => {
 
 //!!! mongoose query has a second argument for error handling now,
 exports.getTour = catchAsync(async (req, res, next) => {
-    const tour = await Tour.findById(req.params.id, (err) => {
-        if (err) {
-            return next(new AppError('No tour found with that ID', 404));
-        }
-    });
+    const tour = await Tour.findById(req.params.id);
     res.status(200).json({
         status: 'success',
         data: {
