@@ -45,8 +45,11 @@ const handleValidationErrorDB = (err) => {
     return new AppError(message, 400);
 };
 
-const handleJWTErrorDB = (err) =>
+const handleJWTError = () =>
     new AppError('Invalid Authentication Token Detected', 401);
+
+const handleJWTExpiredError = () =>
+    new AppError('User session timed out, please login again', 401);
 
 module.exports = (err, req, res, next) => {
     err.statusCode = err.statusCode || 500;
@@ -61,7 +64,8 @@ module.exports = (err, req, res, next) => {
         if (error.code === 11000) error = handleDuplicateFieldsDB(error);
         if (error.name === 'ValidationError')
             error = handleValidationErrorDB(error);
-        if (error.name === 'JsonWebTokenError') error = handleJWTErrorDB(error);
+        if (error.name === 'JsonWebTokenError') error = handleJWTError();
+        if (error.name === 'TokenExpiredError') error = handleJWTExpiredError();
         sendErrorProd(error, res);
     }
 };
