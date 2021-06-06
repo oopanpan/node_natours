@@ -51,19 +51,10 @@ exports.getTour = catchAsync(async (req, res, next) => {
 });
 
 exports.updateTour = catchAsync(async (req, res, next) => {
-    const tour = await Tour.findByIdAndUpdate(
-        req.params.id,
-        req.body,
-        {
-            new: true,
-            runValidators: true,
-        },
-        (err) => {
-            if (err) {
-                return next(new AppError(err));
-            }
-        }
-    );
+    const tour = await Tour.findByIdAndUpdate(req.params.id, req.body, {
+        new: true,
+        runValidators: true,
+    });
     res.status(200).json({
         status: 'success',
         tour,
@@ -71,11 +62,7 @@ exports.updateTour = catchAsync(async (req, res, next) => {
 });
 
 exports.deleteTour = catchAsync(async (req, res, next) => {
-    await Tour.findByIdAndDelete(req.params.id, (err) => {
-        if (err) {
-            return next(new AppError(err));
-        }
-    });
+    await Tour.findByIdAndDelete(req.params.id);
     res.status(204).json({
         status: 'success',
         data: null,
