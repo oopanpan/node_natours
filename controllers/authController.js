@@ -12,12 +12,19 @@ const signToken = (id) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
-    const { name, email, password, passwordConfirm } = req.body;
+    const {
+        name,
+        email,
+        password,
+        passwordConfirm,
+        passwordChangedAt,
+    } = req.body;
     const newUser = await User.create({
         name,
         email,
         password,
         passwordConfirm,
+        passwordChangedAt,
     });
 
     const token = signToken(newUser._id);
@@ -66,6 +73,13 @@ exports.protect = catchAsync(async (req, res, next) => {
 
     //* Verification token using built in util.promisify
     const decoded = await promisify(jwt.verify)(token, process.env.JWT_SECRET);
-    console.log(decoded);
+
+    //* Check double check with the database for user info
+    const currentUser = await User.findById(decoded.id);
+    if (!currentUser) {
+        return next(
+            new AppError('User with the submitted token no longer exists.', 404)
+        );
+    }
     next();
 });
