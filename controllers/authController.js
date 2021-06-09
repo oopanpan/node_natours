@@ -81,5 +81,18 @@ exports.protect = catchAsync(async (req, res, next) => {
             new AppError('User with the submitted token no longer exists.', 404)
         );
     }
+
+    //* Check if passwordChangedAt was altered
+    if (currentUser.changedPasswordAfter(decoded.iat)) {
+        return next(
+            new AppError(
+                'User password has recently changed, please log in again',
+                401
+            )
+        );
+    }
+
+    //* Grant access to protected route
+    req.user = currentUser;
     next();
 });

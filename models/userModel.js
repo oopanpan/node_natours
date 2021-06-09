@@ -63,8 +63,14 @@ userSchema.methods.correctPassword = async function (
 };
 
 userSchema.methods.changedPasswordAfter = function (JWTTimestamp) {
-    if (this.passwordChangeAt) {
-        console.log(this.passwordChangedAt, JWTTimestamp);
+    if (this.passwordChangedAt) {
+        const changedTimestamp = parseInt(
+            this.passwordChangedAt.getTime() / 1000,
+            10
+        );
+        console.log(changedTimestamp, JWTTimestamp);
+        //! JTW token is issued after the data is set,the return will be true if the password was changed
+        return JWTTimestamp < changedTimestamp;
     }
     return false;
 };
